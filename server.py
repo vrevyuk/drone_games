@@ -6,19 +6,20 @@ import asyncio
 import threading
 from crsf import CRSF, Channel
 
-controller_uart = "/dev/tty.usbserial-006FD147"
+#controller_uart = "/dev/tty.usbserial-006FD147"
+controller_uart = "/dev/ttyS0"
 
 MIN_VALUE = 172
 MID_VALUE = 997
-MAX_VALUE = 1822
+MAX_VALUE = 1322
 
 
 class Uart2CRSF:
     def __init__(self):
-        self.yaw = MIN_VALUE
+        self.yaw = MID_VALUE
         self.throttle = MIN_VALUE
-        self.pitch = MIN_VALUE
-        self.roll = MIN_VALUE
+        self.pitch = MID_VALUE
+        self.roll = MID_VALUE
         self.ch1 = MIN_VALUE
         self.ch2 = MIN_VALUE
         self.ch3 = MIN_VALUE
@@ -45,19 +46,20 @@ class Uart2CRSF:
                 self.yaw, self.throttle, self.pitch, self.roll,
                 self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6
             )
+            #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
             if tx_buffer:
                 self.controller_port.write(tx_buffer)
                 self.controller_port.flush()
-            time.sleep(0.005)
+            time.sleep(0.05)
         print("writing to uart has been stopped")
 
     def set_values(self, array_values):
         if len(array_values) != 10:
             raise Exception(f'array length is {len(array_values)} but requires 10 [yaw, throttle, pitch, roll, ch1, '
                             f'ch2, ch3, ch4, ch5, ch6]')
-        print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
+        #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
         for index in range(len(array_values)):
-            print(f'{index} => {array_values[index]}')
+            #print(f'{index} => {array_values[index]}', type(array_values[index]))
             if index == 0:
                 self.yaw = int(array_values[index])
             elif index == 1:
@@ -78,15 +80,16 @@ class Uart2CRSF:
                 self.ch5 = int(array_values[index])
             elif index == 9:
                 self.ch6 = int(array_values[index])
-        print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
+        #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
 
+
+uart_crsf_writer = Uart2CRSF()
+print("uart_crsf_writer created", uart_crsf_writer)
+uart_crsf_writer.start()
+print("uart_crsf_writer started")
 
 async def handler(websocket):
     print("handler entered")
-    uart_crsf_writer = Uart2CRSF()
-    print("uart_crsf_writer created", uart_crsf_writer)
-    uart_crsf_writer.start()
-    print("uart_crsf_writer started")
 
     while True:
         response_code = 200
