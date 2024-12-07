@@ -65,7 +65,7 @@ class Uart2CRSF:
             elif index == 1:
                 self.throttle = max(min(int(array_values[index]), 500), 172)
             elif index == 2:
-                self.pitch = max(min(int(array_values[index]), 1150), 850)
+                self.pitch = max(min(int(array_values[index]), 1150), 800)
             elif index == 3:
                 self.roll = max(min(int(array_values[index]), 1150), 850)
             elif index == 4:
