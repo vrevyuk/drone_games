@@ -1,0 +1,7 @@
+   sudo cp /home/vitalii/drone_games/uart2crsf.service /etc/systemd/system/uart2crsf.service
+   sudo cp /home/vitalii/drone_games/streamer.service /etc/systemd/system/streamer.service
+
+   sudo systemctl daemon-reload
+
+   sudo systemctl enable uart2crsf.service
+   sudo systemctl enable streamer.service

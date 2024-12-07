@@ -61,7 +61,7 @@ class Uart2CRSF:
         for index in range(len(array_values)):
             #print(f'{index} => {array_values[index]}', type(array_values[index]))
             if index == 0:
-                self.yaw = int(array_values[index])
+                self.yaw = max(min(int(array_values[index]), 1200), 800)
             elif index == 1:
                 self.throttle = int(array_values[index])
             elif index == 2:
@@ -87,6 +87,7 @@ uart_crsf_writer = Uart2CRSF()
 print("uart_crsf_writer created", uart_crsf_writer)
 uart_crsf_writer.start()
 print("uart_crsf_writer started")
+
 
 async def handler(websocket):
     print("handler entered")
