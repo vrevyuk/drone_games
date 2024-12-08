@@ -61,7 +61,7 @@ class Uart2CRSF:
         for index in range(len(array_values)):
             #print(f'{index} => {array_values[index]}', type(array_values[index]))
             if index == 0:
-                self.yaw = max(min(int(array_values[index]), 1200), 800)
+                self.yaw = max(min(int(array_values[index]), 1500), 500)
             elif index == 1:
                 self.throttle = max(min(int(array_values[index]), 500), 172)
             elif index == 2:
