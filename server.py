@@ -18,7 +18,7 @@ MAX_VALUE = 1322
 
 class Uart2CRSF:
     def __init__(self):
-        self.main_thread_stop = None
+        self.main_thread_stop_cb = None
         self.yaw = MID_VALUE
         self.throttle = MIN_VALUE
         self.pitch = MID_VALUE
@@ -35,8 +35,8 @@ class Uart2CRSF:
         self.controller_port = serial.Serial(controller_uart, 425000)
         self.crsf = CRSF()
 
-    def set_main_thread_stop(self, main_thread_stop):
-        self.main_thread_stop = main_thread_stop
+    def set_main_thread_stop_callback(self, main_thread_stop_cb):
+        self.main_thread_stop_cb = main_thread_stop_cb
 
     def start(self):
         tx_thread = threading.Thread(target=self.write_2_uart, name="write to uart")
@@ -61,6 +61,8 @@ class Uart2CRSF:
                 time.sleep(0.05)
             except Exception as error:
                 print(">>>", error)
+                if self.main_thread_stop_cb is not None:
+                    self.main_thread_stop_cb()
 
         print("writing to uart has been stopped")
 
@@ -138,7 +140,7 @@ async def main():
     stop = loop.create_future()
     loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
 
-    uart_crsf_writer.set_main_thread_stop(stop)
+    uart_crsf_writer.set_main_thread_stop_callback(stop.set_result)
     uart_crsf_writer.start()
     print("uart_crsf_writer started")
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
