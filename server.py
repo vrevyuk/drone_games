@@ -55,7 +55,7 @@ class Uart2CRSF:
                 time.sleep(0.05)
             except Exception as error:
                 print(error)
-                time.sleep(1)
+                exit(1)
 
         print("writing to uart has been stopped")
 
