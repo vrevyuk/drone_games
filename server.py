@@ -146,7 +146,7 @@ async def main():
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
         while not uart_crsf_writer.write_crsf_stop.is_set():
             print('WEBSOCKET SERVER STARTED')
-            time.sleep(0)
+            time.sleep(0.05)
 
 
 if __name__ == "__main__":
