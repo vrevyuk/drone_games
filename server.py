@@ -18,6 +18,7 @@ MAX_VALUE = 1322
 
 class Uart2CRSF:
     def __init__(self):
+        self.controller_port = None
         self.main_thread_stop_cb = None
         self.yaw = MID_VALUE
         self.throttle = MIN_VALUE
@@ -32,13 +33,13 @@ class Uart2CRSF:
         self.tx_thread = None
         self.rc_thread = None
         self.write_crsf_stop = threading.Event()
-        self.controller_port = serial.Serial(controller_uart, 425000)
         self.crsf = CRSF()
 
     def set_main_thread_stop_callback(self, main_thread_stop_cb):
         self.main_thread_stop_cb = main_thread_stop_cb
 
     def start(self):
+        self.controller_port = serial.Serial(controller_uart, 425000)
         tx_thread = threading.Thread(target=self.write_2_uart, name="write to uart")
         tx_thread.start()
 
@@ -60,9 +61,8 @@ class Uart2CRSF:
 
                 time.sleep(0.05)
             except Exception as error:
-                print(">>>", error)
-                if self.main_thread_stop_cb is not None:
-                    self.main_thread_stop_cb()
+                self.controller_port.close()
+                self.controller_port = serial.Serial(controller_uart, 425000)
 
         print("writing to uart has been stopped")
 
