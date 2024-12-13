@@ -8,8 +8,8 @@ import asyncio
 import threading
 from crsf import CRSF, Channel
 
-controller_uart = "/dev/tty.usbserial-006FD147"
-# controller_uart = "/dev/ttyS0"
+# controller_uart = "/dev/tty.usbserial-006FD147"
+controller_uart = "/dev/ttyS0"
 
 MIN_VALUE = 172
 MID_VALUE = 997
