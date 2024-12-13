@@ -107,8 +107,13 @@ print("uart_crsf_writer created", uart_crsf_writer)
 
 
 async def handler(websocket):
+    global uart_crsf_writer
+
     print("handler entered")
     while not uart_crsf_writer.write_crsf_stop.is_set():
+        if uart_crsf_writer.write_crsf_stop.is_set():
+            break
+
         response_code = 200
         response_text = "OK"
         try:
@@ -143,10 +148,9 @@ async def main():
     global uart_crsf_writer
     uart_crsf_writer.start()
     print("uart_crsf_writer started")
+
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
-        while not uart_crsf_writer.write_crsf_stop.is_set():
-            print('WEBSOCKET SERVER STARTED')
-            time.sleep(0.05)
+        await asyncio.get_running_loop().create_future()
 
 
 if __name__ == "__main__":
