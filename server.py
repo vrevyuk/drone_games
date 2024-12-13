@@ -18,6 +18,7 @@ MAX_VALUE = 1322
 
 class Uart2CRSF:
     def __init__(self):
+        self.main_thread_stop = None
         self.yaw = MID_VALUE
         self.throttle = MIN_VALUE
         self.pitch = MID_VALUE
@@ -33,6 +34,9 @@ class Uart2CRSF:
         self.write_crsf_stop = threading.Event()
         self.controller_port = serial.Serial(controller_uart, 425000)
         self.crsf = CRSF()
+
+    def set_main_thread_stop(self, main_thread_stop):
+        self.main_thread_stop = main_thread_stop
 
     def start(self):
         tx_thread = threading.Thread(target=self.write_2_uart, name="write to uart")
@@ -56,7 +60,7 @@ class Uart2CRSF:
 
                 time.sleep(0.05)
             except Exception as error:
-                print(error)
+                print(">>>", error)
 
         print("writing to uart has been stopped")
 
@@ -64,9 +68,9 @@ class Uart2CRSF:
         if len(array_values) != 10:
             raise Exception(f'array length is {len(array_values)} but requires 10 [yaw, throttle, pitch, roll, ch1, '
                             f'ch2, ch3, ch4, ch5, ch6]')
-        #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
+        # print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
         for index in range(len(array_values)):
-            #print(f'{index} => {array_values[index]}', type(array_values[index]))
+            # print(f'{index} => {array_values[index]}', type(array_values[index]))
             if index == 0:
                 self.yaw = max(min(int(array_values[index]), 1500), 500)
             elif index == 1:
@@ -87,13 +91,11 @@ class Uart2CRSF:
                 self.ch5 = int(array_values[index])
             elif index == 9:
                 self.ch6 = int(array_values[index])
-        #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
+        # print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
 
 
 uart_crsf_writer = Uart2CRSF()
 print("uart_crsf_writer created", uart_crsf_writer)
-uart_crsf_writer.start()
-print("uart_crsf_writer started")
 
 
 async def handler(websocket):
@@ -130,10 +132,15 @@ async def handler(websocket):
 
 
 async def main():
+    global uart_crsf_writer
+
     loop = asyncio.get_running_loop()
     stop = loop.create_future()
     loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
 
+    uart_crsf_writer.set_main_thread_stop(stop)
+    uart_crsf_writer.start()
+    print("uart_crsf_writer started")
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
         print('WEBSOCKET SERVER STARTED')
         await stop
