@@ -8,8 +8,8 @@ import asyncio
 import threading
 from crsf import CRSF, Channel
 
-# controller_uart = "/dev/tty.usbserial-006FD147"
-controller_uart = "/dev/ttyS0"
+controller_uart = "/dev/tty.usbserial-006FD147"
+# controller_uart = "/dev/ttyS0"
 
 MIN_VALUE = 172
 MID_VALUE = 997
@@ -47,9 +47,10 @@ class Uart2CRSF:
         self.write_crsf_stop.set()
         if self.controller_port is not None:
             self.controller_port.close()
+        os.kill(os.getpid(), signal.SIGTERM)
 
     def write_2_uart(self):
-        counter = 0
+        # counter = 0
         while not self.write_crsf_stop.is_set():
             try:
                 tx_buffer = self.crsf.handle_output(
@@ -66,8 +67,8 @@ class Uart2CRSF:
                 # if counter > 10:
                 #     raise Exception('TEST ERROR')
                 # print("COUNTER", counter)
-            except Exception as error:
-                print('>>>>----->', error)
+            except Exception as err:
+                print('>>>>----->', err)
                 self.stop()
 
         print("writing to uart has been stopped")
@@ -144,20 +145,28 @@ async def handler(websocket):
             await websocket.send(json.dumps({'response_code': response_code, 'response_text': response_text}))
 
 
-async def main():
+async def websocket_loop():
     global uart_crsf_writer
+
+    loop = asyncio.get_running_loop()
+    future = loop.create_future()
+
     uart_crsf_writer.start()
     print("uart_crsf_writer started")
+    loop.add_signal_handler(signal.SIGTERM, future.set_result, None)
 
-    async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
-        await asyncio.get_running_loop().create_future()
+    async with websockets.serve(handler, "", 8001) as socket:
+        await future
 
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        asyncio.run(websocket_loop())
     except KeyboardInterrupt:
         print("KEYBOARD INTERRUPT")
-    finally:
         uart_crsf_writer.stop()
+    except Exception as error:
+        print("ERROR ON MAIN THREAD", error)
+    finally:
         print('EXIT')
+        exit(0)
