@@ -7,9 +7,11 @@ import websockets
 import asyncio
 import threading
 from crsf import CRSF, Channel
+from dotenv import load_dotenv
 
-# controller_uart = "/dev/tty.usbserial-006FD147"
-controller_uart = "/dev/ttyS0"
+load_dotenv()
+
+controller_uart = os.getenv("CONTROLLER_UART")
 
 MIN_VALUE = 172
 MID_VALUE = 997
@@ -169,4 +171,3 @@ if __name__ == "__main__":
         print("ERROR ON MAIN THREAD", error)
     finally:
         print('EXIT')
-        exit(0)
