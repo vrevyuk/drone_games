@@ -8,8 +8,8 @@ import asyncio
 import threading
 from crsf import CRSF, Channel
 
-# controller_uart = "/dev/tty.usbserial-006FD147"
-controller_uart = "/dev/ttyS0"
+controller_uart = "/dev/tty.usbserial-006FD147"
+# controller_uart = "/dev/ttyS0"
 
 MIN_VALUE = 172
 MID_VALUE = 997
@@ -45,9 +45,11 @@ class Uart2CRSF:
 
     def stop(self):
         self.write_crsf_stop.set()
-        self.controller_port.close()
+        if self.controller_port is not None:
+            self.controller_port.close()
 
     def write_2_uart(self):
+        counter = 0
         while not self.write_crsf_stop.is_set():
             try:
                 tx_buffer = self.crsf.handle_output(
@@ -60,12 +62,13 @@ class Uart2CRSF:
                     self.controller_port.flush()
 
                 time.sleep(0.05)
-                raise Exception('TEST ERROR')
+                # counter += 1
+                # if counter > 10:
+                #     raise Exception('TEST ERROR')
+                # print("COUNTER", counter)
             except Exception as error:
-                print('-->', error)
-                time.sleep(1)
-                self.controller_port.close()
-                self.controller_port = serial.Serial(controller_uart, 425000)
+                print('>>>>----->', error)
+                self.stop()
 
         print("writing to uart has been stopped")
 
@@ -138,17 +141,12 @@ async def handler(websocket):
 
 async def main():
     global uart_crsf_writer
-
-    loop = asyncio.get_running_loop()
-    stop = loop.create_future()
-    loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
-
-    uart_crsf_writer.set_main_thread_stop_callback(stop.set_result)
     uart_crsf_writer.start()
     print("uart_crsf_writer started")
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
-        print('WEBSOCKET SERVER STARTED')
-        await stop
+        while not uart_crsf_writer.write_crsf_stop.is_set():
+            print('WEBSOCKET SERVER STARTED')
+            time.sleep(0)
 
 
 if __name__ == "__main__":
