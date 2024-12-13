@@ -1,3 +1,5 @@
+import os
+import signal
 import time
 import json
 import serial
@@ -6,8 +8,8 @@ import asyncio
 import threading
 from crsf import CRSF, Channel
 
-#controller_uart = "/dev/tty.usbserial-006FD147"
-controller_uart = "/dev/ttyS0"
+controller_uart = "/dev/tty.usbserial-006FD147"
+# controller_uart = "/dev/ttyS0"
 
 MIN_VALUE = 172
 MID_VALUE = 997
@@ -55,7 +57,6 @@ class Uart2CRSF:
                 time.sleep(0.05)
             except Exception as error:
                 print(error)
-                exit(0)
 
         print("writing to uart has been stopped")
 
@@ -97,8 +98,7 @@ print("uart_crsf_writer started")
 
 async def handler(websocket):
     print("handler entered")
-
-    while True:
+    while not uart_crsf_writer.write_crsf_stop.is_set():
         response_code = 200
         response_text = "OK"
         try:
@@ -121,18 +121,29 @@ async def handler(websocket):
                 response_text = f'Unknown data: "{data}"'
 
             await websocket.send(json.dumps({'response_code': response_code, 'response_text': response_text}))
+            await asyncio.sleep(0)
         except Exception as e:
-            # print(e)
+            print(e)
             response_text = str(e)
             response_code = 500
             await websocket.send(json.dumps({'response_code': response_code, 'response_text': response_text}))
 
 
 async def main():
+    loop = asyncio.get_running_loop()
+    stop = loop.create_future()
+    loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
+
     async with websockets.serve(handler, "", 8001) as soket:  # listen at port 8001
-        print("soket", soket)
-        await asyncio.Future()  # run forever
+        print('WEBSOCKET SERVER STARTED')
+        await stop
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("KEYBOARD INTERRUPT")
+    finally:
+        uart_crsf_writer.stop()
+        print('EXIT')
