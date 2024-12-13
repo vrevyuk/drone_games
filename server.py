@@ -60,7 +60,10 @@ class Uart2CRSF:
                     self.controller_port.flush()
 
                 time.sleep(0.05)
+                raise Exception('TEST ERROR')
             except Exception as error:
+                print('-->', error)
+                time.sleep(1)
                 self.controller_port.close()
                 self.controller_port = serial.Serial(controller_uart, 425000)
 
