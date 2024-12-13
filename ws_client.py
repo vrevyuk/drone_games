@@ -5,7 +5,7 @@ import cv2 as cv
 import threading
 import json
 
-server_url = "ws://192.168.1.71:8001/"
+server_url = "ws://192.168.1.65:8001/"
 window_name = "Drone Games"
 
 async def websocket_main():

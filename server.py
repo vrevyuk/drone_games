@@ -42,15 +42,21 @@ class Uart2CRSF:
 
     def write_2_uart(self):
         while not self.write_crsf_stop.is_set():
-            tx_buffer = self.crsf.handle_output(
-                self.yaw, self.throttle, self.pitch, self.roll,
-                self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6
-            )
-            #print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
-            if tx_buffer:
-                self.controller_port.write(tx_buffer)
-                self.controller_port.flush()
-            time.sleep(0.05)
+            try:
+                tx_buffer = self.crsf.handle_output(
+                    self.yaw, self.throttle, self.pitch, self.roll,
+                    self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6
+                )
+                # print([self.yaw, self.throttle, self.pitch, self.roll, self.ch1, self.ch2, self.ch3, self.ch4, self.ch5, self.ch6])
+                if tx_buffer:
+                    self.controller_port.write(tx_buffer)
+                    self.controller_port.flush()
+
+                time.sleep(0.05)
+            except Exception as error:
+                print(error)
+                time.sleep(1)
+
         print("writing to uart has been stopped")
 
     def set_values(self, array_values):
