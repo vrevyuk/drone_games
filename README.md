@@ -13,7 +13,7 @@
 - sudo systemctl enable streamer.service
 
 
-# SETUP L2TP VPN CONNECTION
+# setup L2TP vpn connection with cli
 ## section in progress
 // sudo apt install network-manager-l2tp resolvconf<br>
 // sudo systemctl disable xl2tpd.service<br>
