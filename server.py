@@ -6,7 +6,7 @@ import serial
 import websockets
 import asyncio
 import threading
-from crsf import CRSF, Channel
+from crsf import CRSF
 from dotenv import load_dotenv
 
 load_dotenv()
