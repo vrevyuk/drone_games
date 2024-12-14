@@ -3,7 +3,7 @@
 - install linux on raspberry pi
 - enable uart
 - https://github.com/bluenviron/mediamtx/releases (*download corresponding to your cpu binary file*)
-- git clone git@github.com:vrevyuk/drone_games.git
+- git clone [git@github.com:vrevyuk/drone_games.git](https://github.com/vrevyuk/drone_games.git)
 - cd drone_games
 - sudo pip install --break-system-packages -r requirements.txt (*because services will be run under root privileges*)
 - sudo cp ./uart2crsf.service /etc/systemd/system/uart2crsf.service
