@@ -46,10 +46,12 @@ class Uart2CRSF:
         tx_thread.start()
 
     def stop(self):
+        if self.write_crsf_stop.is_set():
+            return
         self.write_crsf_stop.set()
         if self.controller_port is not None:
             self.controller_port.close()
-        os.kill(os.getpid(), signal.SIGTERM)
+        # os.kill(os.getpid(), signal.SIGTERM)
 
     def write_2_uart(self):
         # counter = 0
@@ -153,9 +155,13 @@ async def websocket_loop():
     loop = asyncio.get_running_loop()
     future = loop.create_future()
 
+    def stop_loop(arg):
+        print("SIG", arg)
+        future.set_result(arg)
+
     uart_crsf_writer.start()
     print("uart_crsf_writer started")
-    loop.add_signal_handler(signal.SIGTERM, future.set_result, None)
+    loop.add_signal_handler(signal.SIGTERM, stop_loop, None)
 
     async with websockets.serve(handler, "", 8001) as socket:
         await future
@@ -164,10 +170,12 @@ async def websocket_loop():
 if __name__ == "__main__":
     try:
         asyncio.run(websocket_loop())
+        print("STOP APP")
     except KeyboardInterrupt:
         print("KEYBOARD INTERRUPT")
-        uart_crsf_writer.stop()
     except Exception as error:
         print("ERROR ON MAIN THREAD", error)
     finally:
+        uart_crsf_writer.stop()
         print('EXIT')
+        exit(0)
