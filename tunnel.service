@@ -1,0 +1,11 @@
+[Unit]
+Description=Drone games tunnel service.
+
+[Service]
+Type=simple
+ExecStart=sudo /opt/drone_games/ipsec_run.sh start
+Restart=Always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target

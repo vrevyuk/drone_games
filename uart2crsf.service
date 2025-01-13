@@ -3,8 +3,8 @@ Description=A script for crsf signal transformation through uart ports
 After=syslog.target network.target
 
 [Service]
-WorkingDirectory=/home/vitalii/drone_games
-ExecStart=/usr/bin/python /home/vitalii/drone_games/server.py
+WorkingDirectory=/opt/drone_games
+ExecStart=/usr/bin/python /opt/drone_games/server.py
 Restart=always
 RestartSec=1
 
