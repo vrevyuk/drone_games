@@ -66,13 +66,3 @@ case $1 in
 	echo "ha-ha"
 	exit 0
 esac
-
-exit 0
-
-
-ipsec restart
-service xl2tpd restart
-ipsec status
-
-sleep 5
-echo "c myvpn" > /var/run/xl2tpd/l2tp-control
