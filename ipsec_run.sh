@@ -38,9 +38,9 @@ case $1 in
 		route add default dev ppp0
 	fi
 
-	sleep 10
-	echo "CHECK TUNNEL"
-	/opt/drone_games/ipsec_run.sh start
+	#sleep 10
+	#echo "CHECK TUNNEL"
+	#/opt/drone_games/ipsec_run.sh start
 	exit 0
 	;;
 
