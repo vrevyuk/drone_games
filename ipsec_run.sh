@@ -26,6 +26,8 @@ case $1 in
 		echo "WAIT FOR PPP => eth0: $ETH0_IP, ppp0: $PPP_IP->$PPP_GW"
 	done
 
+	echo "IP: $PPP_IP" > /opt/drone_games/current_ip.txt
+
 	IPSEC_ROUTE=$(ip route | grep $VPN_SERVER_IP)
 	if [ ${#IPSEC_ROUTE} -eq 0 ]; then
 		echo "SET ROUTE FOR IPSEC SERVER"
